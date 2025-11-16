@@ -3,7 +3,7 @@ import {Entypo, Feather, MaterialCommunityIcons} from '@expo/vector-icons';
 
 export default function TabsLayout() {
   return (
-    <Tabs>
+    <Tabs screenOptions={{ headerTitleAlign: "center" }}>
       <Tabs.Screen
         name="index"
         options={{
