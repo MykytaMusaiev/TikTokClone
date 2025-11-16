@@ -7,12 +7,12 @@ export default function RootLayout() {
     colors: {
       ...DarkTheme.colors,
       primary: 'white',
-    }
-  }
+    },
+  };
 
   return (
     <ThemeProvider value={myTheme}>
       <Stack screenOptions={{ headerShown: false }} />
     </ThemeProvider>
-  )
+  );
 }
