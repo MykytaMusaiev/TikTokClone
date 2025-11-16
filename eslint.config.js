@@ -1,9 +1,9 @@
-const eslint = require('@eslint/js')
-const tseslint = require('typescript-eslint')
-const react = require('eslint-plugin-react')
-const reactNative = require('eslint-plugin-react-native')
-const prettier = require('eslint-plugin-prettier')
-const globals = require('globals')
+const eslint = require('@eslint/js');
+const tseslint = require('typescript-eslint');
+const react = require('eslint-plugin-react');
+const reactNative = require('eslint-plugin-react-native');
+const prettier = require('eslint-plugin-prettier');
+const globals = require('globals');
 
 module.exports = tseslint.config(
   {
@@ -67,4 +67,4 @@ module.exports = tseslint.config(
       'lines-around-comment': 'off',
     },
   },
-)
+);
