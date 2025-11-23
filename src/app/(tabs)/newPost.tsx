@@ -11,10 +11,15 @@ import {
   Text,
   TouchableOpacity,
   View,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import * as Linking from 'expo-linking';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { useVideoPlayer, VideoView } from 'expo-video';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function NewPostScreen() {
   const [facing, setFacing] = useState<CameraType>('back');
@@ -22,8 +27,14 @@ export default function NewPostScreen() {
   const [micPermission, requestMicPermission] =
     useMicrophonePermissions();
   const [isRecording, setIsRecording] = useState<boolean>(false);
+  const [video, setVideo] = useState<string>();
+  const [description, setDescription] = useState<string>('');
 
   const cameraRef = useRef<CameraView>(null);
+
+  const videoPlayer = useVideoPlayer(null, (player) => {
+    player.loop = true;
+  });
 
   useEffect(() => {
     (async () => {
@@ -80,54 +91,109 @@ export default function NewPostScreen() {
     setIsRecording(true);
     const recordedVideo = await cameraRef.current?.recordAsync();
     if (recordedVideo?.uri) {
-      console.log(recordedVideo.uri);
+      const uri = recordedVideo.uri;
+      setVideo(uri);
+      await videoPlayer.replaceAsync(uri);
+      videoPlayer.play();
     }
   };
+
+  const dismissVideo = () => {
+    setVideo(undefined);
+    videoPlayer.release();
+  };
+
+  const postVideo = () => {};
 
   const stopRecording = () => {
     setIsRecording(false);
     cameraRef.current?.stopRecording();
   };
 
-  return (
-    <View style={styles.container}>
-      <CameraView
-        mode="video"
-        ref={cameraRef}
-        style={styles.camera}
-        facing={facing}
-      />
-      <View style={styles.topBar}>
+  const renderCamera = () => {
+    return (
+      <View style={styles.container}>
+        <CameraView
+          mode="video"
+          ref={cameraRef}
+          style={styles.camera}
+          facing={facing}
+        />
+        <View style={styles.topBar}>
+          <Ionicons
+            name="close"
+            size={40}
+            color="white"
+            onPress={() => router.back()}
+          />
+        </View>
+        <View style={styles.bottomControls}>
+          <Ionicons
+            name="images"
+            size={40}
+            color="white"
+            onPress={selectFromGallery}
+          />
+          <TouchableOpacity
+            style={[
+              styles.recordButton,
+              isRecording && styles.recordingButton,
+            ]}
+            onPress={isRecording ? stopRecording : startRecording}
+          />
+          <Ionicons
+            name="camera-reverse"
+            size={40}
+            color="white"
+            onPress={toggleCameraFacing}
+          />
+        </View>
+      </View>
+    );
+  };
+
+  const renderRecordedVideo = () => {
+    return (
+      <SafeAreaView style={{ flex: 1 }} edges={['bottom']}>
         <Ionicons
           name="close"
           size={40}
           color="white"
-          onPress={() => router.back()}
+          style={styles.closeIcon}
+          onPress={dismissVideo}
         />
-      </View>
-      <View style={styles.bottomControls}>
-        <Ionicons
-          name="images"
-          size={40}
-          color="white"
-          onPress={selectFromGallery}
-        />
-        <TouchableOpacity
-          style={[
-            styles.recordButton,
-            isRecording && styles.recordingButton,
-          ]}
-          onPress={isRecording ? stopRecording : startRecording}
-        />
-        <Ionicons
-          name="camera-reverse"
-          size={40}
-          color="white"
-          onPress={toggleCameraFacing}
-        />
-      </View>
-    </View>
-  );
+        <View style={styles.videoWrapper}>
+          <VideoView
+            player={videoPlayer}
+            contentFit="cover"
+            style={styles.video}
+          />
+        </View>
+        <KeyboardAvoidingView
+          style={styles.descriptionContainer}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          keyboardVerticalOffset={20}
+        >
+          <TextInput
+            style={styles.input}
+            placeholder="Write a caption..."
+            placeholderTextColor="#aaa"
+            multiline
+            value={description}
+            onChangeText={setDescription}
+          />
+          <TouchableOpacity
+            style={styles.postButton}
+            onPress={postVideo}
+          >
+            <Text style={styles.postText}>Post</Text>
+          </TouchableOpacity>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    );
+  };
+
+  return <>{video ? renderRecordedVideo() : renderCamera()}</>;
 }
 
 const styles = StyleSheet.create({
@@ -169,5 +235,42 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-around',
     width: '100%',
+  },
+  closeIcon: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    zIndex: 1,
+  },
+  video: {
+    aspectRatio: 9 / 16,
+  },
+  input: {
+    flex: 1,
+    color: 'white',
+    backgroundColor: '#111',
+    borderRadius: 10,
+    paddingVertical: 15,
+    paddingHorizontal: 10,
+    maxHeight: 110,
+  },
+  postText: {
+    color: '#fff',
+    fontWeight: '700',
+  },
+  postButton: {
+    backgroundColor: '#ff0050',
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+  videoWrapper: {
+    flex: 1,
+  },
+  descriptionContainer: {
+    paddingHorizontal: 5,
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 15,
   },
 });
