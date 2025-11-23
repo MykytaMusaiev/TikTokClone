@@ -20,6 +20,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as ImagePicker from 'expo-image-picker';
 
 export default function NewPostScreen() {
   const [facing, setFacing] = useState<CameraType>('back');
@@ -83,8 +84,20 @@ export default function NewPostScreen() {
   const toggleCameraFacing = () =>
     setFacing((current) => (current === 'back' ? 'front' : 'back'));
 
-  const selectFromGallery = () => {
-    console.log('selected');
+  const selectFromGallery = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      // TODO: limit selection to videos only
+      mediaTypes: ['images', 'videos'],
+      allowsEditing: true,
+      aspect: [9, 16],
+    });
+
+    if (!result.canceled) {
+      const uri = result.assets[0].uri;
+      setVideo(uri);
+      await videoPlayer.replaceAsync(uri);
+      videoPlayer.play();
+    }
   };
 
   const startRecording = async () => {
