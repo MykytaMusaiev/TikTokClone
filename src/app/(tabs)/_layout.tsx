@@ -1,5 +1,9 @@
 import { Tabs } from 'expo-router';
-import { Entypo, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+import {
+  Entypo,
+  Feather,
+  MaterialCommunityIcons,
+} from '@expo/vector-icons';
 
 export default function TabsLayout() {
   return (
@@ -8,7 +12,9 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color }) => <Entypo name="home" size={24} color={color} />,
+          tabBarIcon: ({ color }) => (
+            <Entypo name="home" size={24} color={color} />
+          ),
           headerShown: false,
         }}
       />
@@ -16,14 +22,19 @@ export default function TabsLayout() {
         name="friends"
         options={{
           title: 'Friends',
-          tabBarIcon: ({ color }) => <Feather name="users" size={24} color={color} />,
+          tabBarIcon: ({ color }) => (
+            <Feather name="users" size={24} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="newPost"
         options={{
           title: 'New Post',
-          tabBarIcon: ({ color }) => <Feather name="plus-square" size={24} color={color} />,
+          tabBarIcon: ({ color }) => (
+            <Feather name="plus-square" size={24} color={color} />
+          ),
+          headerShown: false,
         }}
       />
       <Tabs.Screen
@@ -31,7 +42,11 @@ export default function TabsLayout() {
         options={{
           title: 'Inbox',
           tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons name="message-minus-outline" size={24} color={color} />
+            <MaterialCommunityIcons
+              name="message-minus-outline"
+              size={24}
+              color={color}
+            />
           ),
         }}
       />
@@ -40,7 +55,9 @@ export default function TabsLayout() {
         name="profile"
         options={{
           title: 'Profile',
-          tabBarIcon: ({ color }) => <Feather name="user" size={24} color={color} />,
+          tabBarIcon: ({ color }) => (
+            <Feather name="user" size={24} color={color} />
+          ),
         }}
       />
     </Tabs>

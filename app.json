@@ -21,11 +21,27 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.anonymous.TikTokClone"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": ["expo-video"]
+    "plugins": [
+      "expo-router",
+      "expo-video",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow TikTokClone to access your camera",
+          "microphonePermission": "Allow TikTokClone to access your microphone",
+          "recordAudioAndroid": true
+        }
+      ]
+    ]
   }
 }
