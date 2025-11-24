@@ -86,8 +86,7 @@ export default function NewPostScreen() {
 
   const selectFromGallery = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
-      // TODO: limit selection to videos only
-      mediaTypes: ['images', 'videos'],
+      mediaTypes: ['videos'],
       allowsEditing: true,
       aspect: [9, 16],
     });

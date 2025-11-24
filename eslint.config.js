@@ -7,7 +7,13 @@ const globals = require('globals');
 
 module.exports = tseslint.config(
   {
-    ignores: ['node_modules/', 'babel.config.js', 'metro.config.js', 'app.config.js', '*.js.snap'],
+    ignores: [
+      'node_modules/',
+      'babel.config.js',
+      'metro.config.js',
+      'app.config.js',
+      '*.js.snap',
+    ],
   },
 
   eslint.configs.recommended,
@@ -45,12 +51,13 @@ module.exports = tseslint.config(
       },
     },
     rules: {
+      '@typescript-eslint/no-unused-vars': 'warn',
       'react/react-in-jsx-scope': 'off',
       'react/prop-types': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       'react-native/no-unused-styles': 'error',
       'react-native/no-inline-styles': 'warn',
-      'react-native/no-color-literals': 'warn',
+      'react-native/no-color-literals': 'off',
       '@typescript-eslint/no-require-imports': 'off',
       '@typescript-eslint/no-var-requires': 'off',
     },
