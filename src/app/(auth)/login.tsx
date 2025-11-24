@@ -3,6 +3,8 @@ import { Link } from 'expo-router';
 import { useState } from 'react';
 import {
   Alert,
+  KeyboardAvoidingView,
+  Platform,
   StyleSheet,
   Text,
   TextInput,
@@ -17,8 +19,9 @@ export default function Login() {
   const login = useAuthStore((state) => state.login);
 
   const handleLogin = async () => {
+    // TODO add proper validation
     if (!email || !password) {
-      Alert.alert('Error', 'Please enter both email and password.');
+      Alert.alert('Error', 'Login failed. Please try again later.');
       return;
     }
 
@@ -34,9 +37,12 @@ export default function Login() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Login</Text>
-      <Text style={styles.subtitle}>Login</Text>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+    >
+      <Text style={styles.title}>Welcome Back!</Text>
+      <Text style={styles.subtitle}>Sign in to your account</Text>
 
       <TextInput
         style={styles.input}
@@ -56,8 +62,14 @@ export default function Login() {
         onChangeText={setPassword}
         secureTextEntry
       />
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Sign In</Text>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={handleLogin}
+        disabled={isLoading}
+      >
+        <Text style={styles.buttonText}>
+          {isLoading ? 'Signing In...' : 'Sign In'}
+        </Text>
       </TouchableOpacity>
 
       <View style={styles.footer}>
@@ -66,7 +78,7 @@ export default function Login() {
           <Text style={styles.linkText}>Sign Up</Text>
         </Link>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
