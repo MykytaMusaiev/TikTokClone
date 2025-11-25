@@ -1,34 +1,104 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { useAuthStore } from '@/stores/useAuthStore';
+import {
+  Alert,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 export default function ProfileScreen() {
+  const user = useAuthStore((state) => state.user);
+  const logout = useAuthStore((state) => state.logout);
+
+  const handleLogout = async () => {
+    await logout();
+  };
+
+  const onLogoutPressed = async () => {
+    Alert.alert('Logout', 'Are you sure you want to logout?', [
+      {
+        text: 'Cancel',
+        style: 'cancel',
+      },
+      {
+        text: 'Logout',
+        style: 'destructive',
+        onPress: handleLogout,
+      },
+    ]);
+  };
   return (
     <View style={styles.container}>
-      <View style={styles.main}>
-        <Text style={styles.title}>Profile Screen</Text>
-        <Text style={styles.subtitle}>Screen for your profile</Text>
+      <Text style={styles.title}>Profile</Text>
+      <View style={styles.userInfo}>
+        <View style={styles.avatarContainer}>
+          <Text style={styles.avatarText}>
+            {user?.email.charAt(0).toUpperCase()}
+          </Text>
+        </View>
+        <View>
+          <Text style={styles.username}>{user?.username}</Text>
+          <Text style={styles.email}>{user?.email}</Text>
+        </View>
       </View>
+      <TouchableOpacity
+        style={styles.logoutButton}
+        onPress={onLogoutPressed}
+      >
+        <Text style={styles.logoutText}>Logout</Text>
+      </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    alignItems: 'center',
-    padding: 24,
-  },
-  main: {
-    flex: 1,
-    justifyContent: 'center',
-    maxWidth: 960,
-    marginHorizontal: 'auto',
+    padding: 20,
+    gap: 40,
   },
   title: {
-    fontSize: 64,
+    color: 'white',
+    fontSize: 24,
     fontWeight: 'bold',
+    textAlign: 'center',
   },
-  subtitle: {
-    fontSize: 36,
-    color: '#38434D',
+  avatarContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#fff',
+  },
+  avatarText: {
+    color: '#000',
+    fontSize: 40,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    justifyContent: 'center',
+    lineHeight: 80,
+  },
+  userInfo: {
+    alignItems: 'center',
+    gap: 20,
+  },
+  username: {
+    fontSize: 25,
+    color: '#fff',
+    textAlign: 'center',
+  },
+  email: {
+    fontSize: 16,
+    color: '#999',
+  },
+  logoutButton: {
+    backgroundColor: '#ff4444',
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  logoutText: {
+    color: 'white',
+    fontSize: 20,
+    fontWeight: '600',
   },
 });
