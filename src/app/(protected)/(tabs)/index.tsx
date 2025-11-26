@@ -8,10 +8,10 @@ import {
   Text,
 } from 'react-native';
 import PostListItem from '@/components/PostListItem';
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import FeedTab from '@/components/GenericComponents/FeedTab';
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { fetchPosts } from '@/services/posts';
 
 const TABS = {
@@ -25,10 +25,30 @@ export default function HomeScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [activeTab, setActiveTab] = useState(TABS.FOR_YOU);
 
-  const { data, isLoading, isError } = useQuery({
+  const {
+    data,
+    isLoading,
+    isError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: ['posts'],
-    queryFn: fetchPosts,
+    queryFn: ({ pageParam }) => fetchPosts(pageParam),
+    initialPageParam: { limit: 3, cursor: undefined },
+    getNextPageParam: (lastPage, allPages) => {
+      if (lastPage.length === 0) {
+        return undefined;
+      }
+
+      return {
+        limit: 3,
+        cursor: lastPage[lastPage.length - 1].id,
+      };
+    },
   });
+
+  const posts = useMemo(() => data?.pages.flat() || [], [data]);
 
   const onViewableItemsChanged = useRef(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
@@ -78,7 +98,7 @@ export default function HomeScreen() {
         <Ionicons name="search" size={24} color="white" />
       </View>
       <FlatList
-        data={data || []}
+        data={posts}
         renderItem={({ item, index }) => (
           <PostListItem
             postItem={item}
@@ -92,6 +112,10 @@ export default function HomeScreen() {
         decelerationRate={'fast'}
         disableIntervalMomentum
         onViewableItemsChanged={onViewableItemsChanged.current}
+        onEndReached={() =>
+          !isFetchingNextPage && hasNextPage && fetchNextPage()
+        }
+        onEndReachedThreshold={2}
       />
     </View>
   );
