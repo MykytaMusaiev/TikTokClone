@@ -107,8 +107,10 @@ export default function HomeScreen() {
         )}
         getItemLayout={(data, index) => ({
           // TODO -80?
-          length: height - 80,
-          offset: (height - 80) * index,
+          length: height,
+          // length: height - 80,
+          offset: height * index,
+          // offset: (height - 80) * index,
           index,
         })}
         initialNumToRender={3}
