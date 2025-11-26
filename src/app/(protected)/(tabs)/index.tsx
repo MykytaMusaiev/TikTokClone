@@ -105,6 +105,15 @@ export default function HomeScreen() {
             isActive={index === currentIndex}
           />
         )}
+        getItemLayout={(data, index) => ({
+          // TODO -80?
+          length: height - 80,
+          offset: (height - 80) * index,
+          index,
+        })}
+        initialNumToRender={3}
+        maxToRenderPerBatch={3}
+        windowSize={5}
         showsVerticalScrollIndicator={false}
         snapToInterval={height}
         // TODO розібратись з висотою
