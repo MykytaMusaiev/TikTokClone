@@ -1,16 +1,15 @@
-// import { useEvent } from 'expo';
-import { Post } from '@/types';
-import { Ionicons } from '@expo/vector-icons';
-import { useFocusEffect } from 'expo-router';
-import { useVideoPlayer, VideoView } from 'expo-video';
-import { useCallback } from 'react';
 import {
   View,
+  Text,
   StyleSheet,
   Dimensions,
   TouchableOpacity,
-  Text,
 } from 'react-native';
+import { useVideoPlayer, VideoView } from 'expo-video';
+import { Ionicons } from '@expo/vector-icons';
+import { Post } from '@/types';
+import { Link, useFocusEffect } from 'expo-router';
+import { useCallback } from 'react';
 
 type VideoItemProps = {
   postItem: Post;
@@ -18,33 +17,20 @@ type VideoItemProps = {
 };
 
 export default function PostListItem({
-  postItem: {
-    nrOfComments,
-    nrOfLikes,
-    nrOfShares,
-    description,
-    user,
-    video_url,
-  },
+  postItem,
   isActive,
 }: VideoItemProps) {
   const { height } = Dimensions.get('window');
-  const player = useVideoPlayer(
-    { uri: video_url },
-    (player) => {
-      player.loop = true;
-    },
-  );
+  // TODO add shares, likes; similar to NrofComments
+  const { nrOfComments, description, user, video_url } = postItem;
 
-  // const { isPlaying } = useEvent(player, 'playingChange', { isPlaying: player.playing });
-
-  // TODO почитати про висоту екрану для іос\андроід Dimension
+  const player = useVideoPlayer(video_url, (player) => {
+    player.loop = true;
+  });
 
   useFocusEffect(
     useCallback(() => {
-      if (!player) {
-        return;
-      }
+      if (!player) return;
 
       try {
         if (isActive) {
@@ -53,6 +39,7 @@ export default function PostListItem({
       } catch (error) {
         console.log(error);
       }
+
       return () => {
         try {
           if (player && isActive) {
@@ -66,94 +53,64 @@ export default function PostListItem({
   );
 
   return (
-    <View
-      style={[
-        styles.contentContainer,
-        { height: height },
-        // { height: height - 50 },
-      ]}
-    >
+    <View style={{ height: height - 80 }}>
       <VideoView
-        style={styles.video}
+        style={{ flex: 1 }}
         player={player}
         contentFit="cover"
-        nativeControls={false}
+        // nativeControls={false}
       />
 
       <View style={styles.interactionBar}>
         <TouchableOpacity
           style={styles.interactionButton}
-          onPress={() => console.log('Like')}
+          onPress={() => console.log('Like Pressed')}
         >
           <Ionicons name="heart" size={33} color="#fff" />
-          <Text style={styles.interactionText}>
-            {nrOfLikes[0]?.count || 0}
-          </Text>
+          <Text style={styles.interactionText}>{0}</Text>
         </TouchableOpacity>
+
+        <Link href={`postComments/${postItem.id}`} asChild>
+          <TouchableOpacity style={styles.interactionButton}>
+            <Ionicons name="chatbubble" size={30} color="#fff" />
+            <Text style={styles.interactionText}>
+              {nrOfComments[0]?.count || 0}
+            </Text>
+          </TouchableOpacity>
+        </Link>
 
         <TouchableOpacity
           style={styles.interactionButton}
-          onPress={() => console.log('Chat')}
+          onPress={() => console.log('Share Pressed')}
         >
-          <Ionicons
-            name="chatbubble"
-            size={30}
-            color="#fff"
-          />
-          <Text style={styles.interactionText}>
-            {nrOfComments[0]?.count || 0}
-          </Text>
+          <Ionicons name="arrow-redo" size={33} color="#fff" />
+          <Text style={styles.interactionText}>{0}</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.interactionButton}
-          onPress={() => console.log('Share')}
-        >
-          <Ionicons
-            name="arrow-redo"
-            size={33}
-            color="#fff"
-          />
-          <Text style={styles.interactionText}>
-            {nrOfShares[0]?.count || 0}
-          </Text>
-        </TouchableOpacity>
         <TouchableOpacity
           style={styles.avatar}
-          onPress={() => console.log('Profile')}
+          onPress={() => console.log('Profile Pressed')}
         >
           <Text style={styles.avatarText}>
             {user?.username.charAt(0).toUpperCase()}
           </Text>
         </TouchableOpacity>
       </View>
+
       <View style={styles.videoInfo}>
         <Text style={styles.username}>{user.username}</Text>
-        <Text style={styles.description}>
-          {description}
-        </Text>
+        <Text style={styles.description}>{description}</Text>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  contentContainer: {
-    flex: 1,
-    padding: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  video: {
-    flex: 1,
-    width: '100%',
-  },
   interactionBar: {
     position: 'absolute',
     right: 20,
     bottom: 20,
     alignItems: 'center',
-    justifyContent: 'center',
     gap: 25,
   },
   interactionButton: {
@@ -168,8 +125,8 @@ const styles = StyleSheet.create({
   avatar: {
     width: 35,
     height: 35,
-    borderRadius: 20,
     backgroundColor: '#fff',
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
   },

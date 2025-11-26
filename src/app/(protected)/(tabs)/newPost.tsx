@@ -1,40 +1,88 @@
 import {
+  View,
+  Text,
+  Button,
+  StyleSheet,
+  TouchableOpacity,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+  Alert,
+} from 'react-native';
+import {
   CameraView,
   CameraType,
   useCameraPermissions,
   useMicrophonePermissions,
 } from 'expo-camera';
 import { useEffect, useRef, useState } from 'react';
-import {
-  Button,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  TextInput,
-  KeyboardAvoidingView,
-  Platform,
-} from 'react-native';
 import * as Linking from 'expo-linking';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useVideoPlayer, VideoView } from 'expo-video';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAuthStore } from '@/stores/useAuthStore';
+import * as FileSystem from 'expo-file-system';
+import { createPost, uploadVideoToStorage } from '@/services/posts';
 
 export default function NewPostScreen() {
   const [facing, setFacing] = useState<CameraType>('back');
-  const [permission, requestPermission] = useCameraPermissions();
-  const [micPermission, requestMicPermission] =
-    useMicrophonePermissions();
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [video, setVideo] = useState<string>();
   const [description, setDescription] = useState<string>('');
+  const user = useAuthStore((state) => state.user);
 
   const cameraRef = useRef<CameraView>(null);
+  const queryClient = useQueryClient();
+
+  const [permission, requestPermission] = useCameraPermissions();
+  const [micPermission, requestMicPermission] =
+    useMicrophonePermissions();
 
   const videoPlayer = useVideoPlayer(null, (player) => {
     player.loop = true;
+  });
+
+  const { mutate: createNewPost, isPending } = useMutation({
+    mutationFn: async ({
+      video,
+      description,
+    }: {
+      video: string;
+      description: string;
+    }) => {
+      const fileExtension = video.split('.').pop() || 'mp4';
+      const fileName = `${user?.id}/${Date.now()}.${fileExtension}`;
+
+      const file = new FileSystem.File(video);
+      const fileBuffer = await file.bytes();
+
+      if (user) {
+        const videoUrl = await uploadVideoToStorage({
+          fileName,
+          fileExtension,
+          fileBuffer,
+        });
+        await createPost({
+          video_url: videoUrl,
+          description,
+          user_id: user?.id,
+        });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      videoPlayer.release();
+      setDescription('');
+      setVideo('');
+      router.replace('/');
+    },
+    onError: (error) => {
+      Alert.alert('Error', 'Something went wrong. Try again!');
+      // Todo Прибрати
+      console.log(error);
+    },
   });
 
   useEffect(() => {
@@ -58,7 +106,7 @@ export default function NewPostScreen() {
   }, [permission, micPermission]);
 
   if (!permission || !micPermission) {
-    // Camera and mic permissions are still loading.
+    // Camera permissions are still loading.
     return <View />;
   }
 
@@ -71,7 +119,7 @@ export default function NewPostScreen() {
     return (
       <View style={styles.permissionContainer}>
         <Text style={styles.permissionText}>
-          We need your permission to use the camera and microphone.
+          We need your permission to use the camera and microphone
         </Text>
         <Button
           title="Grant Permission"
@@ -99,39 +147,45 @@ export default function NewPostScreen() {
     }
   };
 
-  const startRecording = async () => {
-    setIsRecording(true);
-    const recordedVideo = await cameraRef.current?.recordAsync();
-    if (recordedVideo?.uri) {
-      const uri = recordedVideo.uri;
-      setVideo(uri);
-      await videoPlayer.replaceAsync(uri);
-      videoPlayer.play();
-    }
-  };
-
   const dismissVideo = () => {
     setVideo(undefined);
     videoPlayer.release();
   };
 
-  const postVideo = () => {};
+  const postVideo = () => {
+    if (!video) {
+      Alert.alert('Error', 'No Video Selected');
+      return;
+    }
+    createNewPost({ video, description });
+  };
 
   const stopRecording = () => {
     setIsRecording(false);
     cameraRef.current?.stopRecording();
   };
 
+  const startRecording = async () => {
+    setIsRecording(true);
+    const recordedVideo = await cameraRef.current?.recordAsync();
+    if (recordedVideo?.uri) {
+      const uri = recordedVideo.uri;
+      setVideo(uri);
+      await videoPlayer.replaceAsync({ uri });
+      videoPlayer.play();
+    }
+  };
+
   const renderCamera = () => {
     return (
-      <View style={styles.container}>
+      <View style={{ flex: 1 }}>
         <CameraView
           mode="video"
           ref={cameraRef}
-          style={styles.camera}
+          style={{ flex: 1 }}
           facing={facing}
         />
-        <View style={styles.topBar}>
+        <View style={styles.tobBar}>
           <Ionicons
             name="close"
             size={40}
@@ -139,6 +193,7 @@ export default function NewPostScreen() {
             onPress={() => router.back()}
           />
         </View>
+
         <View style={styles.bottomControls}>
           <Ionicons
             name="images"
@@ -146,6 +201,7 @@ export default function NewPostScreen() {
             color="white"
             onPress={selectFromGallery}
           />
+
           <TouchableOpacity
             style={[
               styles.recordButton,
@@ -153,6 +209,7 @@ export default function NewPostScreen() {
             ]}
             onPress={isRecording ? stopRecording : startRecording}
           />
+
           <Ionicons
             name="camera-reverse"
             size={40}
@@ -164,16 +221,17 @@ export default function NewPostScreen() {
     );
   };
 
-  const renderRecordedVideo = () => {
+  const renderRecorderVideo = () => {
     return (
-      <SafeAreaView style={{ flex: 1 }} edges={['bottom']}>
+      <View style={{ flex: 1 }}>
         <Ionicons
           name="close"
-          size={40}
+          size={32}
           color="white"
-          style={styles.closeIcon}
           onPress={dismissVideo}
+          style={styles.closeIcon}
         />
+
         <View style={styles.videoWrapper}>
           <VideoView
             player={videoPlayer}
@@ -181,14 +239,15 @@ export default function NewPostScreen() {
             style={styles.video}
           />
         </View>
+
         <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={styles.descriptionContainer}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           keyboardVerticalOffset={20}
         >
           <TextInput
             style={styles.input}
-            placeholder="Write a caption..."
+            placeholder="Add a description..."
             placeholderTextColor="#aaa"
             multiline
             value={description}
@@ -201,20 +260,14 @@ export default function NewPostScreen() {
             <Text style={styles.postText}>Post</Text>
           </TouchableOpacity>
         </KeyboardAvoidingView>
-      </SafeAreaView>
+      </View>
     );
   };
 
-  return <>{video ? renderRecordedVideo() : renderCamera()}</>;
+  return <>{video ? renderRecorderVideo() : renderCamera()}</>;
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  camera: {
-    flex: 1,
-  },
   permissionContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -235,15 +288,15 @@ const styles = StyleSheet.create({
   recordingButton: {
     backgroundColor: '#F44336',
   },
-  topBar: {
+  tobBar: {
     position: 'absolute',
     top: 55,
     left: 15,
   },
   bottomControls: {
     position: 'absolute',
-    flexDirection: 'row',
     bottom: 20,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
     width: '100%',
@@ -268,10 +321,11 @@ const styles = StyleSheet.create({
   },
   postText: {
     color: '#fff',
+    fontSize: 17,
     fontWeight: '700',
   },
   postButton: {
-    backgroundColor: '#ff0050',
+    backgroundColor: '#FF0050',
     paddingHorizontal: 15,
     paddingVertical: 10,
     borderRadius: 10,
