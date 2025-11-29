@@ -21,7 +21,9 @@ const TABS = {
 };
 
 export default function HomeScreen() {
+  // TODO refactor to custom hook useDimension
   const { height } = Dimensions.get('window');
+  // const { height } = Dimensions.get('screen');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [activeTab, setActiveTab] = useState(TABS.FOR_YOU);
 
@@ -107,17 +109,19 @@ export default function HomeScreen() {
         )}
         getItemLayout={(data, index) => ({
           // TODO -80?
-          length: height,
-          // length: height - 80,
-          offset: height * index,
-          // offset: (height - 80) * index,
+          // length: height,
+          length: height - 50,
+          // offset: height * index,
+          offset: (height - 50) * index,
           index,
         })}
         initialNumToRender={3}
         maxToRenderPerBatch={3}
         windowSize={5}
         showsVerticalScrollIndicator={false}
-        snapToInterval={height}
+        // snapToAlignment="center"
+        // TODO прибрати коментар, розібратись з комбінацією snapToInterval та Dimension
+        snapToInterval={height - 50}
         // TODO розібратись з висотою
         // snapToInterval={height - 50}
         decelerationRate={'fast'}

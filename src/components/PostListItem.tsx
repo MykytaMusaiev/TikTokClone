@@ -53,7 +53,8 @@ export default function PostListItem({
   );
 
   return (
-    <View style={{ height: height - 80 }}>
+    <View style={{ height: height - 50 }}>
+      {/* <View style={{ height: height }}> */}
       <VideoView
         style={{ flex: 1 }}
         player={player}
