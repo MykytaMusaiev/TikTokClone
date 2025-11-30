@@ -7,7 +7,6 @@ export type Post = {
   user: User;
   nrOfLikes: { count: number }[];
   nrOfComments: { count: number }[];
-  nrOfShares: { count: number }[];
 };
 
 export type PostInput = {
