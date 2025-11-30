@@ -24,10 +24,6 @@ The app delivers a smooth vertical-video experience with essential social featur
 ### 📦 Installation
 ![QR_install](https://github.com/user-attachments/assets/2c56952c-d798-4be1-890e-97edacbe1338)
 
-OR
-
-**[Android Release (APK)](./assets/TikTokClone.apk)**
-
 ---
 
 ### 🧑‍💻 Author
