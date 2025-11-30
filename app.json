@@ -24,8 +24,6 @@
       "predictiveBackGestureEnabled": false,
       "permissions": [
         "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO",
-        "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO"
       ],
       "package": "com.anonymous.TikTokClone"
@@ -55,9 +53,7 @@
         "projectId": "1156f112-0aa2-4198-a9df-5a05bf0f676f"
       }
     },
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
+    "runtimeVersion": "1.0.0",
     "updates": {
       "url": "https://u.expo.dev/1156f112-0aa2-4198-a9df-5a05bf0f676f"
     }
