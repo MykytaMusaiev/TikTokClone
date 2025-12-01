@@ -22,7 +22,7 @@ The app delivers a smooth vertical-video experience with essential social featur
 ---
 
 ### 📦 Installation
-![Direct Link to Download](https://drive.google.com/uc?export=download&id=1SgpM8_PvfrIOwBUWI-yekhMZLpLhOj0S)
+[LINK](https://drive.google.com/uc?export=download&id=1SgpM8_PvfrIOwBUWI-yekhMZLpLhOj0S)
 
 ---
 
